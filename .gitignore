@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+Thumbs.db
+.pytest_cache/
+.tox/
+.ruff_cache/
+htmlcov/
+.coverage
+.env
+develop-eggs/
+.mypy_cache/
+build/
+.venv/
+venv/
+*.swo
