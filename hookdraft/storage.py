@@ -1,21 +1,19 @@
-"""In-memory and file-backed storage for webhook request history."""
-
-import json
+"""Persistent in-memory storage for captured webhook requests."""
 import uuid
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from pathlib import Path
-from typing import Optional
+from typing import Dict, List, Optional
 
 
+@dataclass
 class RequestRecord:
-    def __init__(self, method: str, path: str, headers: dict, body: bytes, query: str = ""):
-        self.id = str(uuid.uuid4())
-        self.timestamp = datetime.now(timezone.utc).isoformat()
-        self.method = method
-        self.path = path
-        self.headers = dict(headers)
-        self.body = body.decode("utf-8", errors="replace")
-        self.query = query
+    id: str
+    timestamp: str
+    method: str
+    path: str
+    headers: Dict[str, str]
+    body: str
+    tags: List[str] = field(default_factory=list)
 
     def to_dict(self) -> dict:
         return {
@@ -25,59 +23,66 @@ class RequestRecord:
             "path": self.path,
             "headers": self.headers,
             "body": self.body,
-            "query": self.query,
+            "tags": self.tags,
         }
 
     @classmethod
     def from_dict(cls, data: dict) -> "RequestRecord":
-        record = cls.__new__(cls)
-        record.id = data["id"]
-        record.timestamp = data["timestamp"]
-        record.method = data["method"]
-        record.path = data["path"]
-        record.headers = data["headers"]
-        record.body = data["body"]
-        record.query = data.get("query", "")
-        return record
+        return cls(
+            id=data["id"],
+            timestamp=data["timestamp"],
+            method=data["method"],
+            path=data["path"],
+            headers=data["headers"],
+            body=data["body"],
+            tags=data.get("tags", []),
+        )
 
 
 class RequestStore:
-    def __init__(self, persist_path: Optional[Path] = None, max_records: int = 500):
-        self._records: list[RequestRecord] = []
-        self._persist_path = persist_path
-        self._max_records = max_records
-        if persist_path and persist_path.exists():
-            self._load()
+    def __init__(self):
+        self._records: Dict[str, RequestRecord] = {}
+        self._order: List[str] = []
 
-    def save(self, record: RequestRecord) -> RequestRecord:
-        self._records.append(record)
-        if len(self._records) > self._max_records:
-            self._records = self._records[-self._max_records:]
-        if self._persist_path:
-            self._dump()
-        return record
+    def save(self, record: RequestRecord) -> None:
+        if record.id not in self._records:
+            self._order.append(record.id)
+        self._records[record.id] = record
 
-    def all(self) -> list[RequestRecord]:
-        return list(reversed(self._records))
+    def all(self, limit: Optional[int] = None) -> List[RequestRecord]:
+        records = [self._records[rid] for rid in reversed(self._order)]
+        if limit is not None:
+            return records[:limit]
+        return records
 
     def get(self, record_id: str) -> Optional[RequestRecord]:
-        return next((r for r in self._records if r.id == record_id), None)
+        return self._records.get(record_id)
 
-    def clear(self) -> int:
-        count = len(self._records)
+    def delete(self, record_id: str) -> bool:
+        if record_id in self._records:
+            del self._records[record_id]
+            self._order.remove(record_id)
+            return True
+        return False
+
+    def clear(self) -> None:
         self._records.clear()
-        if self._persist_path:
-            self._dump()
-        return count
+        self._order.clear()
 
-    def _dump(self):
-        self._persist_path.write_text(
-            json.dumps([r.to_dict() for r in self._records], indent=2)
-        )
 
-    def _load(self):
-        try:
-            data = json.loads(self._persist_path.read_text())
-            self._records = [RequestRecord.from_dict(d) for d in data]
-        except (json.JSONDecodeError, KeyError):
-            self._records = []
+def make_record(
+    method: str = "POST",
+    path: str = "/hook",
+    headers: Optional[Dict[str, str]] = None,
+    body: str = "",
+    tags: Optional[List[str]] = None,
+) -> RequestRecord:
+    return RequestRecord(
+        id=str(uuid.uuid4()),
+        timestamp=datetime.now(timezone.utc).isoformat(),
+        method=method,
+        path=path,
+        headers=headers or {},
+        body=body,
+        tags=tags or [],
+    )
