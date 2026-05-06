@@ -54,3 +54,20 @@ def export_csv():
         mimetype="text/csv",
         headers={"Content-Disposition": "attachment; filename=requests.csv"},
     )
+
+
+@export_bp.route("/requests/export/json/<string:request_id>", methods=["GET"])
+def export_single_json(request_id: str):
+    """Export a single stored request as a JSON file by its ID."""
+    store = get_store()
+    record = store.get(request_id)
+    if record is None:
+        return jsonify({"error": f"Request '{request_id}' not found."}), 404
+    data = json.dumps(record.to_dict(), indent=2)
+    filename = f"request_{request_id}.json"
+    return Response(
+        data,
+        status=200,
+        mimetype="application/json",
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
+    )
