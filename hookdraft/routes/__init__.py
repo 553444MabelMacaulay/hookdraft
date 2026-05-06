@@ -1,4 +1,4 @@
-"""Register all route blueprints onto the Flask app."""
+"""Register all route blueprints with the Flask app."""
 
 from hookdraft.routes.diff_routes import register_diff_routes
 from hookdraft.routes.replay_routes import register_replay_routes
@@ -10,9 +10,11 @@ from hookdraft.routes.notes_routes import register_notes_routes
 from hookdraft.routes.pin_routes import register_pin_routes
 from hookdraft.routes.bookmark_routes import register_bookmark_routes
 from hookdraft.routes.label_routes import register_label_routes
+from hookdraft.routes.severity_routes import register_severity_routes
 
 
 def register_all_routes(app):
+    """Register every feature blueprint with the given Flask app."""
     register_diff_routes(app)
     register_replay_routes(app)
     register_export_routes(app)
@@ -23,3 +25,4 @@ def register_all_routes(app):
     register_pin_routes(app)
     register_bookmark_routes(app)
     register_label_routes(app)
+    register_severity_routes(app)
