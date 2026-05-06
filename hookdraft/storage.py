@@ -1,58 +1,69 @@
-"""Persistent in-memory storage for captured webhook requests."""
+"""Storage layer for webhook request records."""
+
 import uuid
-from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Dict, List, Optional
+from typing import Optional
 
 
-@dataclass
 class RequestRecord:
-    id: str
-    timestamp: str
-    method: str
-    path: str
-    headers: Dict[str, str]
-    body: str
-    tags: List[str] = field(default_factory=list)
+    def __init__(
+        self,
+        method: str,
+        path: str,
+        headers: dict,
+        body: str,
+        timestamp: Optional[str] = None,
+        id: Optional[str] = None,
+        tags: Optional[list] = None,
+        note: Optional[str] = None,
+    ):
+        self.id = id or str(uuid.uuid4())
+        self.method = method
+        self.path = path
+        self.headers = headers
+        self.body = body
+        self.timestamp = timestamp or datetime.now(timezone.utc).isoformat()
+        self.tags = tags or []
+        self.note = note
 
     def to_dict(self) -> dict:
         return {
             "id": self.id,
-            "timestamp": self.timestamp,
             "method": self.method,
             "path": self.path,
             "headers": self.headers,
             "body": self.body,
-            "tags": self.tags,
+            "timestamp": self.timestamp,
+            "tags": list(self.tags),
+            "note": self.note,
         }
 
     @classmethod
     def from_dict(cls, data: dict) -> "RequestRecord":
         return cls(
-            id=data["id"],
-            timestamp=data["timestamp"],
+            id=data.get("id"),
             method=data["method"],
             path=data["path"],
-            headers=data["headers"],
-            body=data["body"],
+            headers=data.get("headers", {}),
+            body=data.get("body", ""),
+            timestamp=data.get("timestamp"),
             tags=data.get("tags", []),
+            note=data.get("note"),
         )
 
 
 class RequestStore:
     def __init__(self):
-        self._records: Dict[str, RequestRecord] = {}
-        self._order: List[str] = []
+        self._records: dict[str, RequestRecord] = {}
 
-    def save(self, record: RequestRecord) -> None:
-        if record.id not in self._records:
-            self._order.append(record.id)
+    def save(self, record: RequestRecord) -> RequestRecord:
         self._records[record.id] = record
+        return record
 
-    def all(self, limit: Optional[int] = None) -> List[RequestRecord]:
-        records = [self._records[rid] for rid in reversed(self._order)]
+    def all(self, limit: Optional[int] = None) -> list:
+        records = list(reversed(list(self._records.values())))
         if limit is not None:
-            return records[:limit]
+            records = records[:limit]
         return records
 
     def get(self, record_id: str) -> Optional[RequestRecord]:
@@ -61,28 +72,11 @@ class RequestStore:
     def delete(self, record_id: str) -> bool:
         if record_id in self._records:
             del self._records[record_id]
-            self._order.remove(record_id)
             return True
         return False
 
     def clear(self) -> None:
         self._records.clear()
-        self._order.clear()
 
-
-def make_record(
-    method: str = "POST",
-    path: str = "/hook",
-    headers: Optional[Dict[str, str]] = None,
-    body: str = "",
-    tags: Optional[List[str]] = None,
-) -> RequestRecord:
-    return RequestRecord(
-        id=str(uuid.uuid4()),
-        timestamp=datetime.now(timezone.utc).isoformat(),
-        method=method,
-        path=path,
-        headers=headers or {},
-        body=body,
-        tags=tags or [],
-    )
+    def count(self) -> int:
+        return len(self._records)
