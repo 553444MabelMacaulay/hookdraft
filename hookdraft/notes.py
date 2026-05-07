@@ -25,6 +25,11 @@ def get_note(record: dict) -> Optional[str]:
     return record.get("note")
 
 
+def has_note(record: dict) -> bool:
+    """Return True if the record has a non-empty note attached."""
+    return bool(record.get("note"))
+
+
 def filter_by_note(records: list, substring: str) -> list:
     """Return records whose note contains *substring* (case-insensitive)."""
     if not substring:
