@@ -1,11 +1,7 @@
 """Register all route blueprints onto the Flask app."""
 
-from __future__ import annotations
 
-from flask import Flask
-
-
-def register_all_routes(app: Flask) -> None:
+def register_all_routes(app):
     from hookdraft.routes.diff_routes import register_diff_routes
     from hookdraft.routes.replay_routes import register_replay_routes
     from hookdraft.routes.export_routes import register_export_routes
@@ -22,6 +18,10 @@ def register_all_routes(app: Flask) -> None:
     from hookdraft.routes.expiry_routes import register_expiry_routes
     from hookdraft.routes.grouping_routes import register_grouping_routes
     from hookdraft.routes.snapshot_routes import register_snapshot_routes
+    from hookdraft.routes.trace_routes import register_trace_routes
+    from hookdraft.routes.throttle_routes import register_throttle_routes
+    from hookdraft.routes.routing_routes import register_routing_routes
+    from hookdraft.routes.priority_routes import register_priority_routes
 
     register_diff_routes(app)
     register_replay_routes(app)
@@ -39,3 +39,7 @@ def register_all_routes(app: Flask) -> None:
     register_expiry_routes(app)
     register_grouping_routes(app)
     register_snapshot_routes(app)
+    register_trace_routes(app)
+    register_throttle_routes(app)
+    register_routing_routes(app)
+    register_priority_routes(app)
