@@ -86,7 +86,22 @@ def test_search_invalid_limit(client):
     assert resp.status_code == 400
 
 
+def test_search_with_limit(client):
+    """Ensure the limit parameter restricts the number of results returned."""
+    resp = client.get("/requests/search?limit=2")
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert len(data) <= 2
+
+
 def test_filter_records_limit():
     records = [_make_record() for _ in range(10)]
     result = filter_records(records, limit=3)
     assert len(result) == 3
+
+
+def test_filter_records_no_limit():
+    """Ensure all records are returned when no limit is specified."""
+    records = [_make_record() for _ in range(5)]
+    result = filter_records(records)
+    assert len(result) == 5
