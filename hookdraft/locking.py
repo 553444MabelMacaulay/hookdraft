@@ -33,6 +33,24 @@ def get_lock_reason(record: RequestRecord) -> str | None:
     return record.meta.get(_LOCK_REASON_KEY)
 
 
+def assert_unlocked(record: RequestRecord) -> None:
+    """Raise a RuntimeError if the record is locked.
+
+    Intended as a guard at the start of mutating operations to prevent
+    accidental modifications to locked records.
+
+    Raises:
+        RuntimeError: If the record is currently locked, with the lock
+            reason included in the message when one is set.
+    """
+    if is_locked(record):
+        reason = get_lock_reason(record)
+        msg = "Record is locked and cannot be modified."
+        if reason:
+            msg = f"Record is locked and cannot be modified: {reason}"
+        raise RuntimeError(msg)
+
+
 def filter_locked(records: List[RequestRecord]) -> List[RequestRecord]:
     """Return only records that are locked."""
     return [r for r in records if is_locked(r)]
