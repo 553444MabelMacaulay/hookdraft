@@ -12,24 +12,32 @@ def get_store():
     return _gs()
 
 
+def _get_record_or_404(store, req_id):
+    """Fetch a record by ID, returning (record, None) or (None, error_response)."""
+    record = store.get(req_id)
+    if record is None:
+        return None, (jsonify({"error": "not found"}), 404)
+    return record, None
+
+
 def register_alias_routes(app):
     bp = Blueprint("alias", __name__)
 
     @bp.route("/requests/<req_id>/alias", methods=["GET"])
     def get_alias_route(req_id):
         store = get_store()
-        record = store.get(req_id)
-        if record is None:
-            return jsonify({"error": "not found"}), 404
+        record, err = _get_record_or_404(store, req_id)
+        if err:
+            return err
         alias = aliasing.get_alias(record.to_dict())
         return jsonify({"alias": alias}), 200
 
     @bp.route("/requests/<req_id>/alias", methods=["PUT"])
     def set_alias_route(req_id):
         store = get_store()
-        record = store.get(req_id)
-        if record is None:
-            return jsonify({"error": "not found"}), 404
+        record, err = _get_record_or_404(store, req_id)
+        if err:
+            return err
         body = request.get_json(silent=True) or {}
         alias = body.get("alias", "")
         try:
@@ -42,9 +50,9 @@ def register_alias_routes(app):
     @bp.route("/requests/<req_id>/alias", methods=["DELETE"])
     def delete_alias_route(req_id):
         store = get_store()
-        record = store.get(req_id)
-        if record is None:
-            return jsonify({"error": "not found"}), 404
+        record, err = _get_record_or_404(store, req_id)
+        if err:
+            return err
         aliasing.clear_alias(record.meta)
         store.save(record)
         return jsonify({"alias": None}), 200
