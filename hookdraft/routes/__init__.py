@@ -1,4 +1,4 @@
-"""Central route registration for hookdraft."""
+"""Route registration for hookdraft."""
 
 from hookdraft.routes.diff_routes import register_diff_routes
 from hookdraft.routes.replay_routes import register_replay_routes
@@ -23,6 +23,13 @@ from hookdraft.routes.priority_routes import register_priority_routes
 from hookdraft.routes.lock_routes import register_lock_routes
 from hookdraft.routes.mention_routes import register_mention_routes
 from hookdraft.routes.annotation_routes import register_annotation_routes
+from hookdraft.routes.alias_routes import register_alias_routes
+from hookdraft.routes.rating_routes import register_rating_routes
+from hookdraft.routes.delegation_routes import register_delegation_routes
+from hookdraft.routes.escalation_routes import register_escalation_routes
+from hookdraft.routes.watchlist_routes import register_watchlist_routes
+from hookdraft.routes.timeline_routes import register_timeline_routes
+from hookdraft.routes.resolution_routes import register_resolution_routes
 
 
 def register_all_routes(app):
@@ -49,3 +56,10 @@ def register_all_routes(app):
     register_lock_routes(app)
     register_mention_routes(app)
     register_annotation_routes(app)
+    register_alias_routes(app)
+    register_rating_routes(app)
+    register_delegation_routes(app)
+    register_escalation_routes(app)
+    register_watchlist_routes(app)
+    register_timeline_routes(app)
+    register_resolution_routes(app)
