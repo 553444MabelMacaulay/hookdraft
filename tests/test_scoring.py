@@ -62,6 +62,14 @@ def test_set_score_non_integer_raises():
         set_score(_rec(), 7.5)  # type: ignore[arg-type]
 
 
+def test_set_score_overwrites_existing():
+    """Setting a score on a record that already has one replaces the old value."""
+    r = _rec()
+    set_score(r, 20)
+    set_score(r, 80)
+    assert get_score(r) == 80
+
+
 def test_clear_score_removes_value():
     r = _rec()
     set_score(r, 55)
@@ -102,6 +110,14 @@ def test_filter_by_max_score():
     assert r1 in result
     assert r2 in result
     assert r3 not in result
+
+
+def test_filter_by_max_score_excludes_unscored():
+    """Unscored records should be excluded from filter_by_max_score results."""
+    r1, r2 = _rec("1"), _rec("2")
+    set_score(r1, 30)
+    result = filter_by_max_score([r1, r2], 100)
+    assert r2 not in result
 
 
 def test_sort_by_score_descending():
