@@ -1,4 +1,3 @@
-"""Register all route blueprints onto the Flask app."""
 from hookdraft.routes.diff_routes import register_diff_routes
 from hookdraft.routes.replay_routes import register_replay_routes
 from hookdraft.routes.export_routes import register_export_routes
@@ -27,6 +26,14 @@ from hookdraft.routes.rating_routes import register_rating_routes
 from hookdraft.categorisation_routes import register_categorisation_routes
 from hookdraft.routes.watchlist_routes import register_watchlist_routes
 from hookdraft.routes.timeline_routes import register_timeline_routes
+from hookdraft.routes.workflow_routes import register_workflow_routes
+from hookdraft.routes.lifecycle_routes import register_lifecycle_routes
+from hookdraft.routes.provenance_routes import register_provenance_routes
+from hookdraft.routes.attachment_routes import register_attachment_routes
+from hookdraft.routes.narration_routes import register_narration_routes
+from hookdraft.routes.subscription_routes import register_subscription_routes
+from hookdraft.routes.signal_routes import register_signal_routes
+from hookdraft.routes.sentiment_routes import register_sentiment_routes
 from hookdraft.routes.delegation_routes import register_delegation_routes
 from hookdraft.routes.escalation_routes import register_escalation_routes
 from hookdraft.routes.resolution_routes import register_resolution_routes
@@ -35,10 +42,7 @@ from hookdraft.routes.ownership_routes import register_ownership_routes
 from hookdraft.routes.suppression_routes import register_suppression_routes
 from hookdraft.routes.attribution_routes import register_attribution_routes
 from hookdraft.routes.quarantine_routes import register_quarantine_routes
-from hookdraft.routes.workflow_routes import register_workflow_routes
-from hookdraft.routes.lifecycle_routes import register_lifecycle_routes
-from hookdraft.routes.provenance_routes import register_provenance_routes
-from hookdraft.routes.attachment_routes import register_attachment_routes
+from hookdraft.routes.evidence_routes import register_evidence_routes
 
 
 def register_all_routes(app):
@@ -70,6 +74,14 @@ def register_all_routes(app):
     register_categorisation_routes(app)
     register_watchlist_routes(app)
     register_timeline_routes(app)
+    register_workflow_routes(app)
+    register_lifecycle_routes(app)
+    register_provenance_routes(app)
+    register_attachment_routes(app)
+    register_narration_routes(app)
+    register_subscription_routes(app)
+    register_signal_routes(app)
+    register_sentiment_routes(app)
     register_delegation_routes(app)
     register_escalation_routes(app)
     register_resolution_routes(app)
@@ -78,7 +90,4 @@ def register_all_routes(app):
     register_suppression_routes(app)
     register_attribution_routes(app)
     register_quarantine_routes(app)
-    register_workflow_routes(app)
-    register_lifecycle_routes(app)
-    register_provenance_routes(app)
-    register_attachment_routes(app)
+    register_evidence_routes(app)
